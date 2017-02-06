@@ -1,4 +1,4 @@
-# electron-tap
+# electron-node-tap
 
 [![Linux Build Status](https://travis-ci.org/electron-utils/electron-tap.svg?branch=master)](https://travis-ci.org/electron-utils/electron-tap)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/agbtqhcwioetdloo?svg=true)](https://ci.appveyor.com/project/jwu/electron-tap)
@@ -13,7 +13,7 @@ Tap testing in Electron. This project has two main value propositions:
 ## Install
 
 ```bash
-npm install -g electron-tap
+npm install -g electron-node-tap
 ```
 
 ## Run Examples:
@@ -25,7 +25,7 @@ npm start example
 ## Usage
 
 ```bash
-electron-tap <path> [options]
+electron-node-tap <path> [options]
 
 Options:
   --help      Show help                                                [boolean]
@@ -39,7 +39,7 @@ Options:
 If you run:
 
 ```bash
-electron-tap ./tests
+electron-node-tap ./tests
 ```
 
 This runs the tests in the main process.
@@ -47,7 +47,7 @@ This runs the tests in the main process.
 If you run:
 
 ```bash
-electron-tap --renderer ./tests
+electron-node-tap --renderer ./tests
 ```
 
 This runs the tests in the renderer process.
