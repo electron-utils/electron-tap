@@ -4,7 +4,7 @@
   "description": "TODO",
   "main": "index.js",
   "bin": {
-    "electron-tap": "bin/run.js"
+    "electron-node-tap": "bin/run.js"
   },
   "scripts": {
     "start": "node bin/run.js",
