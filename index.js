@@ -69,7 +69,9 @@ files = files.map(file => {
 // if we provide preload script, run it first
 if ( yargv.preload ) {
   try {
-    require(yargv.preload);
+    let file = path.join(process.cwd(), yargv.preload);
+    file = require.resolve(file);
+    require(file);
   } catch (err) {
     _logError(err);
     process.exit(1);
@@ -78,27 +80,22 @@ if ( yargv.preload ) {
 }
 
 // start test runner
-if ( yargv.renderer ) {
-  // run in renderer process
-  app.on('ready', () => {
-    try {
+app.on('ready', () => {
+  try {
+    if ( yargv.renderer ) {
+      // run in renderer process
       let runner = require('./lib/renderer/runner-main');
       runner(files, yargv, _done);
-    } catch (err) {
-      _logError(err);
-      process.exit(1);
+    } else {
+      // run in main process
+      let runner = require('./lib/main/runner');
+      runner(files, yargv, _done);
     }
-  });
-} else {
-  // run in main process
-  try {
-    let runner = require('./lib/main/runner');
-    runner(files, yargv, _done);
   } catch (err) {
     _logError(err);
     process.exit(1);
   }
-}
+});
 
 // ==========================
 // internal
