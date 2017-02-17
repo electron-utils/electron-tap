@@ -1,10 +1,14 @@
-var electron = require('electron');
-var spawn = require('child_process').spawn;
+#!/usr/bin/env node
 
-var processArgv = process.argv.slice(2);
-var args = ['./'].concat(processArgv);
+'use strict';
 
-var app = spawn(electron, args, {
+const electron = require('electron');
+const {spawn} = require('child_process');
+
+let processArgv = process.argv.slice(2);
+let args = ['./'].concat(processArgv);
+
+let app = spawn(electron, args, {
   stdio: 'inherit'
 });
 

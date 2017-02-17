@@ -1,7 +1,7 @@
 {
   "name": "electron-node-tap",
-  "version": "1.1.1",
-  "description": "TODO",
+  "version": "1.1.2",
+  "description": "Run node-tap in Electron.",
   "main": "index.js",
   "bin": {
     "electron-node-tap": "bin/run.js"
