@@ -8,7 +8,9 @@
   },
   "scripts": {
     "start": "node bin/run.js",
-    "test": "node bin/run.js ./test/*.spec.js && node bin/run.js ./test/renderer/*.spec.js --renderer"
+    "test": "npm run test:main && npm run test:renderer",
+    "test:main": "node bin/run.js ./test/*.spec.js",
+    "test:renderer": "node bin/run.js ./test/renderer/*.spec.js --renderer"
   },
   "repository": {
     "type": "git",

@@ -7,16 +7,19 @@ const globby = require('globby');
 const path = require('path');
 const chalk = require('chalk');
 
+// yargs
 yargs
 // .strict()
 .help('help')
 .version(app.getVersion())
-.usage('electron-tap <path> [options]')
 .options({
   'renderer': { type: 'boolean', desc: 'Run tests in renderer.' },
+  'preload': { type: 'string', desc: 'Specifies a script that will be loaded before other scripts run in the main process.' },
+  'preload-renderer': { type: 'string', desc: 'Specifies a script that will be loaded before other scripts run in the renderer process.' },
   'detail': { type: 'boolean', default: false, desc: 'Run test in debug mode (It will not quit the test, and open the devtools to help you debug it).' },
   'reporter': { type: 'string', default: 'dot', desc: 'Test reporter, default is \'dot\'' },
 })
+.usage('electron-tap <path> [options]')
 ;
 
 // parse the options in yargs
@@ -37,6 +40,65 @@ for ( let i = 0; i < argv.length; ++i ) {
 
 let yargv = yargs.parse(argv);
 // console.log(yargv); // DEBUG
+
+// handle patterns
+let patterns = yargv._.map(pattern => {
+  let stats = null;
+  try {
+    stats = fs.statSync(pattern);
+  } catch (err) {
+    return pattern;
+  }
+
+  if ( stats && stats.isDirectory() ) {
+    return path.join(pattern, '**/*.spec.js');
+  }
+
+  return pattern;
+});
+
+// glob files
+let files = globby.sync([
+  ...patterns,
+  '!**/fixtures/**',
+]);
+files = files.map(file => {
+  return path.resolve(file);
+});
+
+// if we provide preload script, run it first
+if ( yargv.preload ) {
+  try {
+    require(yargv.preload);
+  } catch (err) {
+    _logError(err);
+    process.exit(1);
+    return;
+  }
+}
+
+// start test runner
+if ( yargv.renderer ) {
+  // run in renderer process
+  app.on('ready', () => {
+    try {
+      let runner = require('./lib/renderer/runner-main');
+      runner(files, yargv, _done);
+    } catch (err) {
+      _logError(err);
+      process.exit(1);
+    }
+  });
+} else {
+  // run in main process
+  try {
+    let runner = require('./lib/main/runner');
+    runner(files, yargv, _done);
+  } catch (err) {
+    _logError(err);
+    process.exit(1);
+  }
+}
 
 // ==========================
 // internal
@@ -59,51 +121,3 @@ function _done (failures) {
 
   process.exit(failures);
 }
-
-app.on('ready', () => {
-  // handle patterns
-  let patterns = yargv._.map(pattern => {
-    let stats = null;
-    try {
-      stats = fs.statSync(pattern);
-    } catch (err) {
-      return pattern;
-    }
-
-    if ( stats && stats.isDirectory() ) {
-      return path.join(pattern, '**/*.spec.js');
-    }
-
-    return pattern;
-  });
-
-  // glob files
-  let files = globby.sync([
-    ...patterns,
-    '!**/fixtures/**',
-  ]);
-  files = files.map(file => {
-    return path.resolve(file);
-  });
-
-  // run in renderer process
-  if ( yargv.renderer ) {
-    try {
-      let runner = require('./lib/renderer/runner-main');
-      runner(files, yargv, _done);
-    } catch (err) {
-      _logError(err);
-      process.exit(1);
-    }
-    return;
-  }
-
-  // run normal
-  try {
-    let runner = require('./lib/main/runner');
-    runner(files, yargv, _done);
-  } catch (err) {
-    _logError(err);
-    process.exit(1);
-  }
-});
